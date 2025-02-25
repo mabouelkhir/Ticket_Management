@@ -1,0 +1,36 @@
+version: '3.8'
+services:
+  mysql-db:
+    image: mysql
+    container_name: mysql-container
+    environment:
+      MYSQL_ROOT_PASSWORD: ""
+      MYSQL_DATABASE: ticketmanagement
+    ports:
+      - "3307:3306"
+    networks:
+      - springmysql
+
+  spring-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spring-container
+    ports:
+      - "8082:8080"
+    depends_on:
+      - mysql-db
+    environment:
+      MYSQL_URL: jdbc:mysql://mysql-container:3306/ticketmanagement?autoReconnect=true&useSSL=false
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD:
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 10
+    networks:
+      - springmysql
+
+networks:
+  springmysql:
+    name: springmysql
